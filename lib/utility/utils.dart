@@ -82,7 +82,7 @@ showLoaderDialog(BuildContext context) {
 
 printConsoleData(String key, String? value) {
   if (kDebugMode) {
-    print('$key=====$value');
+    print('$key   $value');
   }
 }
 

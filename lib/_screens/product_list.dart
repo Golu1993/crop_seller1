@@ -149,7 +149,7 @@ class ProductListState extends State<ProductList> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => AddProduct(null))).then((value) => null);
+                                builder: (context) => AddProduct(null))).then((value) => hitGetProductDetailsAPI());
                       },
                       child: Container(
                         width: 30,

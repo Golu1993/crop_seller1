@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:crop_seller/_models/dashboard_model.dart';
-import 'package:crop_seller/_models/login_model.dart';
 import 'package:crop_seller/_screens/add_product.dart';
 import 'package:crop_seller/_screens/crop_care.dart';
+import 'package:crop_seller/_screens/dashboard.dart';
 import 'package:crop_seller/_screens/profile.dart';
 import 'package:crop_seller/_screens/query_list.dart';
 import 'package:crop_seller/utility/Const.dart';
@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'notifications.dart';
+import 'order_list.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -29,20 +30,20 @@ class HomeState extends State<HomePage> {
   bool _isApiSuccess = false;
   Position? position;
   DashboardData? _dashboardData;
-  double _lat=28.8040898;
-  double _long=76.2202096;
+  double _lat = 28.8040898;
+  double _long = 76.2202096;
 
   @override
   initState() {
     super.initState();
     _determinePosition().then((value1) => {
           position = value1,
-         hitDashboardAPI(value1.latitude,value1.longitude),
+          hitDashboardAPI(value1.latitude, value1.longitude),
         });
     getLoginData();
   }
 
-  Map getRequest(double _lat,double _long) {
+  Map getRequest(double _lat, double _long) {
     var request = {
       'api': '1',
       'action': 'weather',
@@ -200,20 +201,20 @@ class HomeState extends State<HomePage> {
                                       ClipOval(
                                           child: _isApiSuccess
                                               ? Container(
-                                            height: 35,
-                                            width: 35,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color.fromRGBO(9, 64, 159, 1)
-                                            ),
-                                            child: Image.network(
-                                              _dashboardData
-                                                  ?.weather?.icon ??
-                                                  '',
-                                              height: 35,
-                                              width: 35,
-                                            ),
-                                          )
+                                                  height: 35,
+                                                  width: 35,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Color.fromRGBO(
+                                                          9, 64, 159, 1)),
+                                                  child: Image.network(
+                                                    _dashboardData
+                                                            ?.weather?.icon ??
+                                                        '',
+                                                    height: 35,
+                                                    width: 35,
+                                                  ),
+                                                )
                                               : Image.asset(
                                                   'images/rain.png',
                                                   height: 35,
@@ -304,15 +305,19 @@ class HomeState extends State<HomePage> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       ClipOval(
-                                        child: _isApiSuccess?Image.network(
-                                          _dashboardData?.windspeed?.icon??'',
-                                          height: 35,
-                                          width: 35,
-                                        ):Image.asset(
-                                          'images/wind.png',
-                                          height: 35,
-                                          width: 35,
-                                        ),
+                                        child: _isApiSuccess
+                                            ? Image.network(
+                                                _dashboardData
+                                                        ?.windspeed?.icon ??
+                                                    '',
+                                                height: 35,
+                                                width: 35,
+                                              )
+                                            : Image.asset(
+                                                'images/wind.png',
+                                                height: 35,
+                                                width: 35,
+                                              ),
                                       ),
                                       SizedBox(
                                         width: 10,
@@ -377,7 +382,13 @@ class HomeState extends State<HomePage> {
                           children: [
                             Expanded(
                                 child: GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            Dashboard(2,0)));
+                              },
                               child: Container(
                                 height: 100,
                                 child: Stack(
@@ -440,7 +451,15 @@ class HomeState extends State<HomePage> {
                               width: 15,
                             ),
                             Expanded(
-                              child: Container(
+                              child:GestureDetector(
+                                onTap: (){
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Dashboard(2,2)));
+                                },
+                                child: Container(
                                 height: 100,
                                 child: Stack(
                                   children: [
@@ -497,7 +516,7 @@ class HomeState extends State<HomePage> {
                                         blurRadius: 5,
                                       ),
                                     ]),
-                              ),
+                              ),),
                             ),
                           ],
                         ),
@@ -520,10 +539,11 @@ class HomeState extends State<HomePage> {
                                 child: InkWell(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            AddProduct(null))).then((value) => null);
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                AddProduct(null)))
+                                    .then((value) => null);
                               },
                               child: Container(
                                 height: 150,
@@ -583,9 +603,10 @@ class HomeState extends State<HomePage> {
                                 child: InkWell(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Profile())).then((value) => getLoginData());
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Profile()))
+                                    .then((value) => getLoginData());
                               },
                               child: Container(
                                 height: 150,
@@ -736,7 +757,7 @@ class HomeState extends State<HomePage> {
                                               CrossAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Product',
+                                              'Query',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -785,8 +806,8 @@ class HomeState extends State<HomePage> {
   }
 
   getLoginData() {
-    MySharedPrefences().getUserImage().then((value) => _imagePath=value);
-    MySharedPrefences().getUserName().then((value) => _userName=value);
+    MySharedPrefences().getUserImage().then((value) => _imagePath = value);
+    MySharedPrefences().getUserName().then((value) => _userName = value);
     setState(() {});
   }
 
@@ -801,9 +822,8 @@ class HomeState extends State<HomePage> {
       // accessing the position and request users of the
       // App to enable the location services.
       print(Future.error('Location services are disabled.'));
-     return await Geolocator.getCurrentPosition(
+      return await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.medium);
-
     }
 
     permission = await Geolocator.checkPermission();
@@ -815,7 +835,7 @@ class HomeState extends State<HomePage> {
         // Android's shouldShowRequestPermissionRationale
         // returned true. According to Android guidelines
         // your App should show an explanatory UI now.
-        hitDashboardAPI(_lat,_long);
+        hitDashboardAPI(_lat, _long);
         return Future.error('Location permissions are denied');
       }
     }
@@ -838,14 +858,14 @@ class HomeState extends State<HomePage> {
     return position;
   }
 
-  hitDashboardAPI(double _lat,double _long) {
+  hitDashboardAPI(double _lat, double _long) {
     MySharedPrefences().getSession().then((value) => {
-      session = value,
-      APIServices(context, session)
-          .callApi(Const.dashboard_url, getRequest(_lat,_long))
-          .then(
-            (value) => checkResponse(value),
-      ),
-    });
+          session = value,
+          APIServices(context, session)
+              .callApi(Const.dashboard_url, getRequest(_lat, _long))
+              .then(
+                (value) => checkResponse(value),
+              ),
+        });
   }
 }

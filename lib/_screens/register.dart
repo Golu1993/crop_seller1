@@ -198,8 +198,8 @@ class Register_State extends State<Register> {
                   onPressed: () => {
                         if (validateViews())
                           {
-                            APIServices(context,"")
-                                .callApi(Const.register_url, getRequest())
+                            APIServices(context, "")
+                                .callApi(Const.register_url, getRequest(), true)
                                 .then(
                                   (value) => checkResponse(value),
                                 ),
@@ -279,8 +279,16 @@ class Register_State extends State<Register> {
       Fluttertoast.showToast(msg: data.message!);
       if (data.status == 1) {
         MySharedPrefences().setIsLogin(true);
+        MySharedPrefences().setUserName(
+            '${data.data![0].fname ?? ''} ${data.data![0].lname ?? ''}');
+        MySharedPrefences().setUserImage(data.data![0].image ?? '');
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => BasicInfo(null)));
+      } else {
+        MySharedPrefences().setIsLogin(false);
+        MySharedPrefences().setUserName('');
+        MySharedPrefences().setUserImage('');
+        MySharedPrefences().setSession('');
       }
     }
   }

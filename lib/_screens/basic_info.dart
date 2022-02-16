@@ -462,6 +462,7 @@ class BasicInfo_State extends State<BasicInfo> {
         if (_isEditData) {
           Navigator.pop(context, true);
         } else {
+          MySharedPrefences().setUserName('${fnameControler.text} ${mnameControler.text} ${lnameControler.text}');
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => Address(null)));
         }

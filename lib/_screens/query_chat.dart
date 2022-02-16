@@ -12,8 +12,10 @@ import 'package:intl/intl.dart';
 
 class QueryChat extends StatefulWidget {
   String _buyerId = '';
+  String _productId = '';
 
-  QueryChat(this._buyerId);
+
+  QueryChat(this._buyerId, this._productId);
 
   @override
   State<StatefulWidget> createState() {
@@ -37,7 +39,8 @@ class QueryChatState extends State<QueryChat> {
   Map getRequest() {
     var request = {
       'api': '1',
-      'action': 'list',
+      'action': 'product_query_answer',
+      'product_id': widget._productId,
       'buyer_id': widget._buyerId,
     };
     return request;
@@ -142,7 +145,7 @@ class QueryChatState extends State<QueryChat> {
                         else
                           {
                             APIServices(context, session)
-                                .callApi(Const.chat_url, getChatRequest())
+                                .callApi(Const.product_url, getChatRequest())
                                 .then(
                                   (value) => checkResponse2(value),
                             ),
@@ -169,8 +172,9 @@ class QueryChatState extends State<QueryChat> {
   Map getChatRequest() {
     var request = {
       'api': '1',
-      'action': 'save',
+      'action': 'product_query_reply',
       'buyer_id': widget._buyerId,
+      'product_id': widget._productId,
       'comment': commentController.text,
       //comment_id:2
     };
@@ -319,7 +323,7 @@ class QueryChatState extends State<QueryChat> {
   }
 
   hitGetChatApi() {
-    APIServices(context, session).callApi(Const.chat_url, getRequest()).then(
+    APIServices(context, session).callApi(Const.product_url, getRequest()).then(
           (value) => checkResponse(value),
     );
   }

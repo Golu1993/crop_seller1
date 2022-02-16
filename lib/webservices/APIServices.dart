@@ -31,12 +31,15 @@ class APIServices {
     }
   }
 
-  Future<String> callApi(String mainUrl, Map request) async {
+  Future<String> callApi(String mainUrl, Map request,[newLogin=false]) async {
     try {
       if (headers.isEmpty && session != '') {
         headers['cookie'] = session;
         printConsoleData('rawCookie headers=====', headers.toString());
         printConsoleData('request session=====', session);
+      }
+      if(newLogin){
+        headers['cookie']='';
       }
       var url = '${Const.main_url}$mainUrl';
       printConsoleData(' request URL=====', url);
@@ -58,7 +61,8 @@ class APIServices {
         return response.body;
       }
     } on Exception catch (e) {
-      printConsoleData('Exception  ', e.runtimeType.toString());
+      Fluttertoast.showToast(msg: e.runtimeType.toString());
+      printConsoleData('Exception  ', e.toString());
       Navigator.pop(_context);
     }
     return '';

@@ -23,12 +23,12 @@ class MySharedPrefences {
   }
   void setUserName(String data) async {
     SharedPreferences preff = await preferences;
-    preff.setString("login_data", data);
+    preff.setString("user_name", data);
   }
 
   Future<String> getUserName() async {
     SharedPreferences preff = await preferences;
-    return preff.getString("login_data") ?? "";
+    return preff.getString("user_name") ?? "";
   }
   void setUserImage(String data) async {
     SharedPreferences preff = await preferences;

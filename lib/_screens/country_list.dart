@@ -1,7 +1,6 @@
 import 'package:crop_seller/_models/combo_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CountryList extends StatefulWidget {
   List<CommonData> _listCountry = [];

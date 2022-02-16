@@ -2035,7 +2035,7 @@ class ProductDetailsState extends State<ProductDetails> {
                       controller: unitCostController
                         ..text = data?.unitCost ?? '',
                       style: TextStyle(color: Colors.black, fontSize: 14),
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                           labelText: getUnitCostHint(data?.type ?? type),

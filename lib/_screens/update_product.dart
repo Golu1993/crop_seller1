@@ -5,7 +5,6 @@ import 'package:crop_seller/_models/product_details_model.dart';
 import 'package:crop_seller/_models/product_update_model.dart';
 import 'package:crop_seller/utility/Const.dart';
 import 'package:crop_seller/utility/MySharedPrefences.dart';
-import 'package:crop_seller/utility/utils.dart';
 import 'package:crop_seller/webservices/APIServices.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,9 +44,10 @@ class UpdateProductState extends State<UpdateProduct> {
   List<ProductUpdateData> _listData = [];
   String productId = '';
   String photoPeriodId = '';
+  String _PhotoPeriod = 'Light(in hours)';
   String _growthId = '';
-  bool _canShowForm = false;
   int daysEntry = 0;
+  bool _isViewMode = false;
   List<PhotoPeriod> _listPhotoPeriod = [];
 
   @override
@@ -61,6 +61,7 @@ class UpdateProductState extends State<UpdateProduct> {
           session = value,
           hitUpdateDataAPI(0),
         });
+    currentPos = getDate().length - 1;
   }
 
   @override
@@ -110,28 +111,17 @@ class UpdateProductState extends State<UpdateProduct> {
                 child: getDaysList(),
               ),
               Expanded(
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: _listData.isEmpty || _canShowForm
-                        ? getFormWidget()
-                        : Column(
-                            children: [
-                              getFilledTimeDataList(),
-                              _listData.length < daysEntry
-                                  ? ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(100, 40),
-                                        primary: HexColor.fromHex('#7DC852'),
-                                      ),
-                                      onPressed: () => {
-                                        _canShowForm = true,
-                                        setState(() {}),
-                                      },
-                                      child: Text('Add More'),
-                                    )
-                                  : SizedBox(),
-                            ],
-                          )),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _listData.length <= daysEntry
+                          ? getFormWidget()
+                          : SizedBox(),
+                      getFilledTimeDataList(),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -145,7 +135,6 @@ class UpdateProductState extends State<UpdateProduct> {
     Fluttertoast.showToast(msg: data.message!);
     if (data.status == 1) {
       Navigator.pop(context);
-
     }
   }
 
@@ -220,9 +209,8 @@ class UpdateProductState extends State<UpdateProduct> {
 
   getDaysList() {
     List<DateTime> _listDays = getDate();
-    currentPos=_listDays.length-1;
     var list = ListView.builder(
-      controller: _controller,
+        controller: _controller,
         itemCount: _listDays.length,
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
@@ -231,13 +219,15 @@ class UpdateProductState extends State<UpdateProduct> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _canShowForm = false;
                   selectedDate =
                       DateFormat('yyyy-MM-dd').format(_listDays[index]);
                   hitUpdateDataAPI(1);
-                  setState(() {
-                    currentPos = index;
-                  });
+                  _isViewMode = false;
+                  currentPos = index;
+                  _PhotoPeriod = 'Light(in hours)';
+                  photoPeriodId = '';
+                  setEditableData(-1);
+                  setState(() {});
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -296,8 +286,9 @@ class UpdateProductState extends State<UpdateProduct> {
 
   hitUpdateDataAPI(int index) {
     List<DateTime> _listDays = getDate();
-    if (index == 0&&_listDays.isNotEmpty) {
-      selectedDate = DateFormat('yyyy-MM-dd').format(_listDays[_listDays.length-1]);
+    if (index == 0 && _listDays.isNotEmpty) {
+      selectedDate =
+          DateFormat('yyyy-MM-dd').format(_listDays[_listDays.length - 1]);
     }
     APIServices(context, session)
         .callApi(Const.product_url, getRequest1())
@@ -310,6 +301,7 @@ class UpdateProductState extends State<UpdateProduct> {
     var listView = ListView.builder(
       itemCount: _listData.length,
       shrinkWrap: true,
+      primary: false,
       itemBuilder: (context, index) {
         return Container(
           width: MediaQuery.of(context).size.width,
@@ -323,14 +315,29 @@ class UpdateProductState extends State<UpdateProduct> {
                 style: ElevatedButton.styleFrom(
                     minimumSize: Size(60, 30), primary: Colors.orange),
                 onPressed: () => {
-                  _canShowForm = true,
-                  _growthId=_listData[index].growthId??'',
+                  _growthId = _listData[index].growthId ?? '',
+                  _isViewMode = false,
                   setEditableData(index),
                   setState(() {}),
                 },
                 child: Text('Edit'),
               ),
-              Expanded(child: SizedBox()),
+              SizedBox(
+                width: 10,
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size(60, 30), primary: Colors.blue),
+                onPressed: () => {
+                  setEditableData(index),
+                  _isViewMode = true,
+                  setState(() {}),
+                },
+                child: Text('View'),
+              ),
+              SizedBox(
+                width: 20,
+              ),
             ],
           ),
         );
@@ -342,374 +349,435 @@ class UpdateProductState extends State<UpdateProduct> {
   getFormWidget() {
     return Column(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
+        SizedBox(
+          height: 10,
+        ),
+        Divider(
+          height: 2,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: electricController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Watts',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
+                    ),
+                    // border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              height: 57,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+                child: Column(
               children: [
-                SizedBox(
-                  height: 10,
+                Container(
+                  height: 56,
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  child: DropdownButton<PhotoPeriod>(
+                    menuMaxHeight: 400,
+                    isExpanded: true,
+                    hint: Text(
+                      _PhotoPeriod,
+                      style: TextStyle(color: Colors.black, fontSize: 14),
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    elevation: 2,
+                    underline: SizedBox(),
+                    onChanged: (PhotoPeriod? newValue) {
+                      setState(() {
+                        photoPeriodId = newValue?.id ?? '';
+                        _PhotoPeriod = newValue?.name ?? '';
+                      });
+                    },
+                    items: !_isViewMode?_listPhotoPeriod.map((value) {
+                      return DropdownMenuItem<PhotoPeriod>(
+                        value: value,
+                        child: Text(value.name ?? ''),
+                      );
+                    }).toList():null,
+                  ),
                 ),
-                Divider(
-                  height: 2,
+                Container(
                   color: Colors.grey,
-                  thickness: 1,
+                  height: 1,
+                )
+              ],
+            ))
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: highRHController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Highest RH %',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
+                    ),
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: electricController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Watts',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            ),
+            Container(
+              height: 50,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: lowRHController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: "Lowest RH %",
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 57,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: lightController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Light (in hours)',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: highRHController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Highest RH %',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: dayTempController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Day Temperature in C',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 50,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: lowRHController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: "Lowest RH %",
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: dayTempController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: const InputDecoration(
-                            labelText: 'Day Temperature',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            ),
+            Container(
+              height: 57,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: nightTempController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Night Temprature in C',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 57,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: nightTempController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Night Temprature',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: waterPhController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Water PH',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: waterPhController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Water PH',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 57,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: waterGalController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Water (gal)',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: gmController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Gm',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            ),
+            Container(
+              height: 57,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: waterGalController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Water (gal)',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 57,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: waterTempController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Water Temp',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: flowersController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Flowers',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: gmController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Gm',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                    Container(
-                      height: 57,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: vegController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Veg',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 50,
-                        child: TextFormField(
-                          controller: labourController,
-                          style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.done,
-                          decoration: InputDecoration(
-                            labelText: 'Labour',
-                            contentPadding: EdgeInsets.only(
-                              left: 10.0,
-                              right: 10,
-                            ),
-                            // border: InputBorder.none,
-                          ),
-                        ),
-                      ),
+              ),
+            ),
+            Container(
+              height: 57,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: waterTempController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Water Temp',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
                     ),
-                  ],
+                    // border: InputBorder.none,
+                  ),
                 ),
-                SizedBox(
-                  height: 30,
+              ),
+            )
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: flowersController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Flowers',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
+                    ),
+                    // border: InputBorder.none,
+                  ),
                 ),
-                ElevatedButton(
+              ),
+            ),
+            Container(
+              height: 57,
+              width: 1,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: vegController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Veg',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
+                    ),
+                    // border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,
+                child: TextFormField(
+                  enabled: !_isViewMode,
+                  controller: labourController,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    labelText: 'Labour',
+                    contentPadding: EdgeInsets.only(
+                      left: 10.0,
+                      right: 10,
+                    ),
+                    // border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  primary: Color.fromRGBO(187, 187, 187, 1),
+                  //primary: Color.fromARGB(1,125, 200, 82),
+                  minimumSize: Size(150, 45),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25))),
+              onPressed: () => {
+                setEditableData(-1),
+                _growthId = '',
+                _isViewMode = false,
+                setState(() {}),
+              },
+              child: Text(
+                "Cancel",
+                style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                    color: Colors.black),
+              ),
+            ),
+            SizedBox(
+              width: 20,
+            ),
+            _isViewMode
+                ? SizedBox()
+                : ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: HexColor.fromHex('#7DC852'),
+                        primary: Color.fromRGBO(125, 200, 82, 1),
                         //primary: Color.fromARGB(1,125, 200, 82),
-                        minimumSize: const Size(200, 50),
+                        minimumSize: Size(150, 45),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25))),
                     onPressed: () => {
-                          if (validateViews())
-                            {
-                              APIServices(context, session)
-                                  .callApi(Const.product_url, getRequest())
-                                  .then(
-                                    (value) => checkResponse(value),
-                                  ),
-                            }
-                        },
-                    child: Text("SAVE",
-                        style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 16,
-                            color: Colors.black))),
-                SizedBox(
-                  height: 30,
-                ),
-              ],
+                      if (validateViews())
+                        {
+                          APIServices(context, session)
+                              .callApi(Const.product_url, getRequest())
+                              .then(
+                                (value) => checkResponse(value),
+                              ),
+                        }
+                    },
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 16,
+                          color: Colors.black),
+                    ),
+                  ),
+            SizedBox(
+              width: 20,
             ),
-          ),
-        )
+          ],
+        ),
+        SizedBox(
+          height: 30,
+        ),
       ],
     );
   }
 
   setEditableData(int index) {
-    var dataModel = _listData[index];
+    var dataModel = index == -1 ? ProductUpdateData() : _listData[index];
+
     electricController.text = dataModel.electricity ?? '';
     lightController.text = dataModel.photoPeriod ?? '';
     highRHController.text = dataModel.highestRh ?? '';
@@ -723,8 +791,11 @@ class UpdateProductState extends State<UpdateProduct> {
     vegController.text = dataModel.vegetative ?? '';
     gmController.text = dataModel.germination ?? '';
     flowersController.text = dataModel.flowering ?? '';
-    labourController.text = dataModel.labour??'';
+    labourController.text = dataModel.labour ?? '';
+    _PhotoPeriod = dataModel.photoPeriod ?? 'Light(in hours)';
+    photoPeriodId = dataModel.photoPeriodId ?? '';
   }
+
   final ScrollController _controller = ScrollController();
 
 // This is what you're looking for!

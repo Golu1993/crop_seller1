@@ -26,7 +26,7 @@ class QueryListState extends State<QueryList> {
     MySharedPrefences().getSession().then((value) => {
       session = value,
       APIServices(context, session)
-          .callApi(Const.chat_url, getRequest())
+          .callApi(Const.product_url, getRequest())
           .then(
             (value) => checkResponse(value),
       ),
@@ -36,7 +36,7 @@ class QueryListState extends State<QueryList> {
   Map getRequest() {
     var request = {
       'api': '1',
-      'action': 'product_query',
+      'action': 'product_query_list',
     };
     return request;
   }
@@ -137,7 +137,7 @@ class QueryListState extends State<QueryList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Q. ${_listQuery[index].question??''}',
+                  'Q. ${_listQuery[index].comment??''}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -145,7 +145,7 @@ class QueryListState extends State<QueryList> {
                   ),
                 ),
                 Text(
-                  _listQuery[index].productName??'',
+                  _listQuery[index].name??'',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -179,7 +179,7 @@ class QueryListState extends State<QueryList> {
                 ElevatedButton(
                   onPressed: () => {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => QueryChat(_listQuery[index].buyerId??'')))
+                        MaterialPageRoute(builder: (context) => QueryChat(_listQuery[index].buyerId??'',_listQuery[index].productId??'')))
                   },
                   style: ElevatedButton.styleFrom(
                       minimumSize: Size(double.minPositive, 25),

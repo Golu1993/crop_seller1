@@ -10,6 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class OrderList extends StatefulWidget {
+  int _tabIndex = 0;
+
+  OrderList([this._tabIndex=0]);
+
   @override
   State<StatefulWidget> createState() {
     return OrderList_State();
@@ -27,6 +31,7 @@ class OrderList_State extends State<OrderList> {
   @override
   void initState() {
     super.initState();
+    tabIndex=widget._tabIndex;
     MySharedPrefences().getSession().then((value) => {
           session = value,
           APIServices(context, session)
@@ -215,17 +220,26 @@ class OrderList_State extends State<OrderList> {
   }
 
   getListItem(int tabIndex) {
+    var _listOrderData = getListData();
+    if(_listOrderData.isEmpty){
+     return Container(
+       child: Align(
+         alignment: Alignment.center,
+         child: Text('No Order found',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,),),
+       ),
+     );
+    }
     var listview = ListView.builder(
-        itemCount: getListData().length,
+        itemCount: _listOrderData.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          return getListItemsWidget(position, index);
+          return getListItemsWidget(position, index,_listOrderData);
         });
     return listview;
   }
 
-  getListItemsWidget(int pos, int index) {
-    var orderData = getListData()[index];
+  getListItemsWidget(int pos, int index, List<OrderData> list) {
+    var orderData = list[index];
     return GestureDetector(
       onTap: () {
         setState(() {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crop_seller/_models/basic_model.dart';
 import 'package:crop_seller/utility/Const.dart';
 import 'package:crop_seller/utility/utils.dart';
 import 'package:crop_seller/webservices/APIServices.dart';
@@ -25,7 +26,7 @@ class Forgot_Password_State extends State<Forgot_Password> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -62,7 +63,7 @@ class Forgot_Password_State extends State<Forgot_Password> {
                   fontSize: 12,
                   color: Colors.white60),
             ),
-            _isOtpSend == true ? getResetPasswordWidget() : getOtpWidget(),
+            _isOtpSend ? getResetPasswordWidget() : getOtpWidget(),
             OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.green),
@@ -327,29 +328,29 @@ class Forgot_Password_State extends State<Forgot_Password> {
   }
 
   checkResponse(String value) {
-    // if (value != "") {
-    //   BasicModel data = BasicModel.fromJson(jsonDecode(value));
-    //   if (data.status == 1) {
-    //     Fluttertoast.showToast(msg: data.message!);
-    //     Navigator.pop(context);
-    //   } else {
-    //     Fluttertoast.showToast(msg: data.message!);
-    //   }
-    // }
+    if (value != "") {
+      BasicModel data = BasicModel.fromJson(jsonDecode(value));
+      if (data.status == 1) {
+        Fluttertoast.showToast(msg: data.message!);
+        Navigator.pop(context);
+      } else {
+        Fluttertoast.showToast(msg: data.message!);
+      }
+    }
   }
 
   checkOtpResponse(String value) {
-    // if (value != "") {
-    //   BasicModel data = BasicModel.fromJson(jsonDecode(value));
-    //   if (data.status == 1) {
-    //     Fluttertoast.showToast(msg: data.message!);
-    //     setState(() {
-    //       _isOtpSend = true;
-    //     });
-    //     FocusNode();
-    //   } else {
-    //     Fluttertoast.showToast(msg: data.message!);
-    //   }
-    // }
+    if (value != "") {
+      BasicModel data = BasicModel.fromJson(jsonDecode(value));
+      if (data.status == 1) {
+        Fluttertoast.showToast(msg: data.message!);
+        setState(() {
+          _isOtpSend = true;
+        });
+        FocusNode();
+      } else {
+        Fluttertoast.showToast(msg: data.message!);
+      }
+    }
   }
 }

@@ -7,18 +7,31 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Dashboard extends StatefulWidget {
+  int selectedIndex = 0;
+  int orderIndex = 0;
+
+  Dashboard([this.selectedIndex=0,this.orderIndex=0]);
+
   @override
   State<Dashboard> createState() => DashboardState();
 }
 
 class DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
+  int _orderIndex = 0;
   DateTime? currentBackPressTime;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIndex=widget.selectedIndex;
+    _orderIndex=widget.orderIndex;
   }
 
   @override
@@ -80,7 +93,7 @@ class DashboardState extends State<Dashboard> {
         }
       case 2:
         {
-          return OrderList();
+          return OrderList(_orderIndex);
         }
       case 3:
         {

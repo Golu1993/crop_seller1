@@ -169,7 +169,7 @@ class AddProductState extends State<AddProduct> {
                                 minimumSize: const Size(150, 35),
                               ),
                               onPressed: () {
-                                showOptionDialog();
+                                _getImageFromGallery();
                               },
                               child: Text(
                                 'Upload Images',
@@ -344,7 +344,7 @@ class AddProductState extends State<AddProduct> {
                         child: TextFormField(
                           controller: _waterController,
                           style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Water level in Litre',
@@ -367,7 +367,7 @@ class AddProductState extends State<AddProduct> {
                         child: TextFormField(
                           controller: _weightController,
                           style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Weight(kg)',
@@ -390,7 +390,7 @@ class AddProductState extends State<AddProduct> {
                         child: TextFormField(
                           controller: _priceController,
                           style: TextStyle(color: Colors.black, fontSize: 14),
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Price(\$)',
@@ -547,7 +547,7 @@ class AddProductState extends State<AddProduct> {
             ),
             GestureDetector(
               onTap: () {
-                _getImageFromGallery(1);
+                _getImageFromGallery();
                 Navigator.pop(context);
               },
               child: Text(
@@ -560,7 +560,7 @@ class AddProductState extends State<AddProduct> {
             ),
             GestureDetector(
               onTap: () {
-                _getImageFromGallery(2);
+                _getImageFromGallery();
                 Navigator.pop(context);
               },
               child: Text(
@@ -575,15 +575,14 @@ class AddProductState extends State<AddProduct> {
     showDialog(context: context, builder: (BuildContext _context) => dialog);
   }
 
-  _getImageFromGallery(int type) async {
-    XFile? pickedFile = await ImagePicker().pickImage(
-      source: type == 2 ? ImageSource.gallery : ImageSource.camera,
-    );
-    printConsoleData('picked file path', pickedFile?.path ?? '');
+  _getImageFromGallery() async {
+    List<XFile>? pickedFile = await ImagePicker().pickMultiImage();
     if (pickedFile != null) {
       setState(() {
-        File imageFile = File(pickedFile.path);
-        _listImage.add(imageFile);
+        for(XFile file in pickedFile) {
+          File imageFile = File(file.path);
+          _listImage.add(imageFile);
+        }
       });
     }
   }

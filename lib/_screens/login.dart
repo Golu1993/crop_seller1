@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:crop_seller/_models/login_model.dart';
 import 'package:crop_seller/_screens/forgot_password.dart';
 import 'package:crop_seller/_screens/register.dart';
-import 'package:crop_seller/_screens/splash.dart';
 import 'package:crop_seller/utility/Const.dart';
 import 'package:crop_seller/utility/MySharedPrefences.dart';
 import 'package:crop_seller/utility/utils.dart';
@@ -25,9 +24,13 @@ class Login_State extends State<Login> {
   TextStyle defaultStyle = TextStyle(color: Colors.white, fontSize: 16);
   TextStyle linkStyle = TextStyle(color: Colors.orange);
   bool isApi = true;
-  final emailControler = TextEditingController(text: "dheerusingh59@gmail.com");
-  final passwordControler = TextEditingController(text: "1");
-  String session="";
+  final emailControler =
+      TextEditingController(/*text: 'dheerusingh59@gmail.com'*/);
+  final passwordControler = TextEditingController(/*text: '1'*/);
+
+  // final emailControler = TextEditingController(text: 'dheerusingh59@gmail.com');
+  // final passwordControler = TextEditingController(text: '1');
+  String session = '';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +38,7 @@ class Login_State extends State<Login> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("images/theme_back.png"),
+            image: AssetImage('images/theme_back.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -49,21 +52,21 @@ class Login_State extends State<Login> {
                 Container(
                   padding: EdgeInsets.only(left: 80, right: 80),
                   child: Image.asset(
-                    "images/logo.png",
+                    'images/logo.png',
                     width: MediaQuery.of(context).size.width,
                     height: 100,
                     fit: BoxFit.contain,
                   ),
                 ),
                 const Text(
-                  "Sign In",
+                  'Sign In',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                       color: Colors.white),
                 ),
                 const Text(
-                  "Please enter the details below to continue",
+                  'Please enter the details below to continue',
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 12,
@@ -73,7 +76,7 @@ class Login_State extends State<Login> {
                   height: 50,
                 ),
                 const Text(
-                  "Username",
+                  'Email',
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 14,
@@ -90,18 +93,18 @@ class Login_State extends State<Login> {
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      hintText: "Username",
+                      hintText: 'Email',
                       contentPadding: EdgeInsets.only(
                           left: 10.0, top: 10, right: 10, bottom: 10),
                       border: InputBorder.none,
                       // suffixIcon: IconButton(
                       //   icon: Icon(Icons.alternate_email, size: 14),
-                      //   onPressed: () => Fluttertoast.showToast(msg: "msg"),
+                      //   onPressed: () => Fluttertoast.showToast(msg: 'msg'),
                       // ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Required";
+                        return 'Required';
                       }
                       return null;
                     },
@@ -111,7 +114,7 @@ class Login_State extends State<Login> {
                   height: 30,
                 ),
                 const Text(
-                  "Password",
+                  'Password',
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 14,
@@ -130,19 +133,19 @@ class Login_State extends State<Login> {
                     textInputAction: TextInputAction.done,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Required";
+                        return 'Required';
                       }
                       return null;
                     },
                     decoration: InputDecoration(
-                      hintText: "Password",
+                      hintText: 'Password',
                       contentPadding: EdgeInsets.only(
                           left: 10.0, top: 10, right: 10, bottom: 10),
                       border: InputBorder.none,
 
                       // suffixIcon: IconButton(
                       //   icon: Icon(Icons.remove_red_eye_outlined, size: 14),
-                      //   onPressed: () => Fluttertoast.showToast(msg: "msg"),
+                      //   onPressed: () => Fluttertoast.showToast(msg: 'msg'),
                       // ),
                     ),
                   ),
@@ -161,7 +164,7 @@ class Login_State extends State<Login> {
                                   builder: (context) => Forgot_Password()))
                         },
                         child: Text(
-                          "Forgot Password?",
+                          'Forgot Password?',
                           style: TextStyle(
                               fontWeight: FontWeight.normal,
                               fontSize: 16,
@@ -182,15 +185,17 @@ class Login_State extends State<Login> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25))),
                     onPressed: () => {
-
                           if (validateViews())
                             {
-                              APIServices(context,session).callApi(Const.login_url,getRequest()).then(
+                              MySharedPrefences().setSession(''),
+                              APIServices(context, session)
+                                  .callApi(Const.login_url, getRequest(), true)
+                                  .then(
                                     (value) => checkResponse(value),
                                   ),
                             }
                         },
-                    child: Text("Login",
+                    child: Text('Login',
                         style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontSize: 16,
@@ -214,8 +219,7 @@ class Login_State extends State<Login> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Register()
-                                      ));
+                                          builder: (context) => Register()));
                                 },
                             ),
                           ],
@@ -231,12 +235,14 @@ class Login_State extends State<Login> {
       ),
     );
   }
+
   @override
   void initState() {
     super.initState();
-    MySharedPrefences().setSession("");
-
+    MySharedPrefences().setSession('');
+    MySharedPrefences().setIsLogin(false);
   }
+
   @override
   void dispose() {
     emailControler.dispose();
@@ -245,29 +251,28 @@ class Login_State extends State<Login> {
   }
 
   checkResponse(String value) {
-    if(value!="") {
+    if (value != '') {
       LoginModel data = LoginModel.fromJson(jsonDecode(value));
+      Fluttertoast.showToast(msg: data.message!);
       if (data.status == 1) {
-        if (data.message == "Already Login.") {
-          APIServices(context,"").callApi(Const.logout_url,  getRequest());
-          Fluttertoast.showToast(msg: "Login again");
-          return;
-        }
-        Fluttertoast.showToast(msg: data.message!);
         MySharedPrefences().setIsLogin(true);
-        MySharedPrefences().setUserName('${data.data![0].fname??''} ${data.data![0].lname??''}');
-        MySharedPrefences().setUserImage(data.data![0].image??'');
+        MySharedPrefences().setUserName(
+            '${data.data![0].fname ?? ''} ${data.data![0].lname ?? ''}');
+        MySharedPrefences().setUserImage(data.data![0].image ?? '');
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => Dashboard()));
       } else {
-        Fluttertoast.showToast(msg: data.message!);
+        MySharedPrefences().setIsLogin(false);
+        MySharedPrefences().setUserName('');
+        MySharedPrefences().setUserImage('');
+        MySharedPrefences().setSession('');
       }
     }
   }
 
   Map getRequest() {
     var request = {
-      'api': "1",
+      'api': '1',
       'login': emailControler.text,
       'password': passwordControler.text,
     };
@@ -275,14 +280,13 @@ class Login_State extends State<Login> {
   }
 
   validateViews() {
-    if (emailControler.text == "") {
-      Fluttertoast.showToast(msg: "Enter user name");
+    if (emailControler.text == '') {
+      Fluttertoast.showToast(msg: 'Enter user name');
       return false;
-    }
-    else if (passwordControler.text == "") {
-      Fluttertoast.showToast(msg: "Enter password");
+    } else if (passwordControler.text == '') {
+      Fluttertoast.showToast(msg: 'Enter password');
       return false;
-    }else{
+    } else {
       return true;
     }
   }
